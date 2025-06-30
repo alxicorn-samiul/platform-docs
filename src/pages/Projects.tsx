@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { createClient } from "@supabase/supabase-js";
 import ProjectCard from "../components/ProjectCard";
 
@@ -11,7 +11,6 @@ type Props = {};
 
 const Projects = ({}: Props) => {
   const [projects, setProjects] = useState<any[]>([]);
-  console.log(projects);
 
   useEffect(() => {
     const fetchProjects = async () => {
