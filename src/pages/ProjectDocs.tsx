@@ -42,7 +42,7 @@ const ProjectDocs = ({}: Props) => {
   return (
     <div className="flex flex-row w-full h-screen">
       {/* Available Documents Column */}
-      <div className="flex flex-col w-[16vw] h-screen bg-gray-100 fixed left-0 top-0 z-10">
+      <div className="flex flex-col w-[16vw] h-screen bg-gray-100 fixed left-0 top-0 z-10 pt-14">
         <p className="p-4 pb-2">{`${docs.length} document files found!`}</p>
         <div className="flex flex-col gap-2 p-4 pt-2 overflow-y-auto flex-1">
           {docs.map((doc) => (
