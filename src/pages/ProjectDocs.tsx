@@ -1,9 +1,22 @@
 import { useParams } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { createClient } from "@supabase/supabase-js";
 import DocumentCard from "../components/DocumentCard";
 import SwaggerUI from "swagger-ui-react";
 import "swagger-ui-react/swagger-ui.css";
+
+type categories = {
+  [key: string]: docs[];
+};
+
+type docs = {
+  id: number;
+  project_slug: string;
+  file_path: string;
+  category: string;
+  created_at: string;
+  updated_at: string;
+};
 
 type Props = {};
 
@@ -13,11 +26,12 @@ const supabase = createClient(
 );
 
 const ProjectDocs = ({}: Props) => {
-  const [docs, setDocs] = useState<any[]>([]);
+  const [docs, setDocs] = useState<docs[]>([]);
   const { project_name } = useParams<{ project_name: string }>();
   const [currentDoc, setCurrentDoc] = useState<string | null>(null);
+  const [categories, setCategories] = useState<categories | null>(null);
 
-  useState(() => {
+  useEffect(() => {
     const fetchDocs = async () => {
       const { data, error } = await supabase
         .from("docs")
@@ -28,31 +42,54 @@ const ProjectDocs = ({}: Props) => {
         console.error("Error fetching docs:", error);
       } else {
         setDocs(data || []);
+        // Set the first document as the current document if available
+        if (data && data.length > 0) {
+          setCurrentDoc(data[0].file_path);
+        }
+        // Categorize documents
+        const categorizedDocs: categories = {};
+        data?.forEach((doc) => {
+          if (!categorizedDocs[doc.category]) {
+            categorizedDocs[doc.category] = [];
+          }
+          categorizedDocs[doc.category].push(doc);
+        });
+        setCategories(categorizedDocs);
       }
     };
 
     fetchDocs();
-    // @ts-ignore
-  }, []);
+  }, [project_name]);
 
   const handleDocClick = (filePath: string) => () => {
     setCurrentDoc(filePath);
   };
+
+  console.log(Object.keys(categories || {}));
 
   return (
     <div className="flex flex-row w-full h-screen">
       {/* Available Documents Column */}
       <div className="flex flex-col w-[16vw] h-screen bg-gray-100 fixed left-0 top-0 z-10 pt-14">
         <p className="p-4 pb-2">{`${docs.length} document files found!`}</p>
-        <div className="flex flex-col gap-2 p-4 pt-2 overflow-y-auto flex-1">
-          {docs.map((doc) => (
-            <div
-              onClick={handleDocClick(doc.file_path)}
-              className="cursor-pointer"
-            >
-              <DocumentCard doc={doc} key={doc.id} />
-            </div>
-          ))}
+        <div className="overflow-y-auto flex-1">
+          {categories &&
+            Object.keys(categories).map((categoryName) => (
+              <div key={categoryName} className="p-4">
+                <h2 className="text-lg font-semibold mb-2 text-gray-800 border-b border-gray-300 pb-1">
+                  {categoryName}
+                </h2>
+                <div className="space-y-2">
+                  {categories[categoryName].map((doc: docs) => (
+                    <DocumentCard
+                      key={doc.id}
+                      doc={doc}
+                      onClick={handleDocClick(doc.file_path)}
+                    />
+                  ))}
+                </div>
+              </div>
+            ))}
         </div>
       </div>
 
