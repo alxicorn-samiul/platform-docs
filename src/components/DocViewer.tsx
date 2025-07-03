@@ -32,7 +32,7 @@ const DocViewer = ({}: Props) => {
     };
 
     fetchDoc();
-  });
+  }, [doc_id]);
   return (
     <div>
       {doc ? (
