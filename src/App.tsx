@@ -1,6 +1,7 @@
 import { Link, Route, Routes } from "react-router-dom";
 import Projects from "./pages/Projects";
 import ProjectDocs from "./pages/ProjectDocs";
+import DocViewer from "./components/DocViewer";
 
 function App() {
   return (
@@ -16,7 +17,9 @@ function App() {
       <main className="flex-1 pt-16">
         <Routes>
           <Route path="/" element={<Projects />} />
-          <Route path=":project_name" element={<ProjectDocs />}></Route>
+          <Route path=":project_name" element={<ProjectDocs />}>
+            <Route path=":doc_id" element={<DocViewer />} />
+          </Route>
         </Routes>
       </main>
     </div>

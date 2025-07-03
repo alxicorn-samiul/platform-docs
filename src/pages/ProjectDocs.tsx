@@ -1,9 +1,7 @@
-import { useParams } from "react-router-dom";
+import { useParams, Outlet } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { createClient } from "@supabase/supabase-js";
 import DocumentCard from "../components/DocumentCard";
-import SwaggerUI from "swagger-ui-react";
-import "swagger-ui-react/swagger-ui.css";
 
 type categories = {
   [key: string]: docs[];
@@ -28,7 +26,6 @@ const supabase = createClient(
 const ProjectDocs = ({}: Props) => {
   const [docs, setDocs] = useState<docs[]>([]);
   const { project_name } = useParams<{ project_name: string }>();
-  const [currentDoc, setCurrentDoc] = useState<string | null>(null);
   const [categories, setCategories] = useState<categories | null>(null);
 
   useEffect(() => {
@@ -41,13 +38,12 @@ const ProjectDocs = ({}: Props) => {
       if (error) {
         console.error("Error fetching docs:", error);
       } else {
+        // Set the documents state
         setDocs(data || []);
-        // Set the first document as the current document if available
-        if (data && data.length > 0) {
-          setCurrentDoc(data[0].file_path);
-        }
+
         // Categorize documents
         const categorizedDocs: categories = {};
+
         data?.forEach((doc) => {
           if (!categorizedDocs[doc.category]) {
             categorizedDocs[doc.category] = [];
@@ -60,12 +56,6 @@ const ProjectDocs = ({}: Props) => {
 
     fetchDocs();
   }, [project_name]);
-
-  const handleDocClick = (filePath: string) => () => {
-    setCurrentDoc(filePath);
-  };
-
-  console.log(Object.keys(categories || {}));
 
   return (
     <div className="flex flex-row w-full h-screen">
@@ -81,11 +71,7 @@ const ProjectDocs = ({}: Props) => {
                 </h2>
                 <div className="space-y-2">
                   {categories[categoryName].map((doc: docs) => (
-                    <DocumentCard
-                      key={doc.id}
-                      doc={doc}
-                      onClick={handleDocClick(doc.file_path)}
-                    />
+                    <DocumentCard key={doc.id} doc={doc} />
                   ))}
                 </div>
               </div>
@@ -95,13 +81,7 @@ const ProjectDocs = ({}: Props) => {
 
       {/* Main Document Viewing Area */}
       <div className="w-[84vw] min-h-screen p-4 bg-white ml-[16vw]">
-        {currentDoc ? (
-          <SwaggerUI url={currentDoc} />
-        ) : (
-          <div className="flex flex-col items-center justify-center h-full">
-            <p className="text-xl">Select a Document from the menu to view.</p>
-          </div>
-        )}
+        <Outlet />
       </div>
     </div>
   );

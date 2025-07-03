@@ -16,7 +16,7 @@ const Projects = ({}: Props) => {
     const fetchProjects = async () => {
       const { data, error } = await supabase
         .from("projects")
-        .select("*")
+        .select(`*, docs!docs_project_fkey(*)`)
         .order("created_at", { ascending: false });
 
       if (error) {
@@ -28,6 +28,7 @@ const Projects = ({}: Props) => {
 
     fetchProjects();
   }, []);
+
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
       <div className="border rounded-lg shadow-lg bg-white w-full max-w-4xl flex flex-col gap-2 justify-center px-5 py-3">
@@ -38,8 +39,8 @@ const Projects = ({}: Props) => {
 
         {Projects.length > 0 ? (
           <>
-            {projects.map((project) => (
-              <ProjectCard project={project} key={project.id} />
+            {projects.map((project, i) => (
+              <ProjectCard key={i} project={project} />
             ))}
           </>
         ) : (
